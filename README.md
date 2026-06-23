@@ -11,5 +11,5 @@ docker build -t kernel-dev . && docker run --rm -v $(pwd):/root/env kernel-dev m
 To run it in QEMU:
 
 ```bash
-docker run --rm -v $(pwd):/root/env kernel-dev qemu-system-x86_64 -cdrom kernel.iso -display curses
+docker run --rm -it -v $(pwd):/root/env kernel-dev qemu-system-x86_64 -cdrom kernel.iso -display curses
 ```
