@@ -26,7 +26,7 @@ build/print.o: src/kernel/print.c | build
 build/kernel.bin: build/header.o build/boot.o build/long_mode.o build/main.o build/print.o
 	$(LD) -n -T targets/x86_64/linker.ld -o $@ $^
 
-kernel.iso: build/kernel.bin
+kernel.iso: build/kernel.bin targets/x86_64/grub.cfg
 	mkdir -p build/isofiles/boot/grub
 	cp build/kernel.bin build/isofiles/boot/kernel.bin
 	cp targets/x86_64/grub.cfg build/isofiles/boot/grub/grub.cfg
