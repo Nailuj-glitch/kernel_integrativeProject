@@ -1,0 +1,15 @@
+
+# Kernel build artifacts
+kernel-project/build/
+kernel-project/kernel.iso
+kernel-project/*.ppm
+
+# Black Hat Bash lab artifacts
+Black-Hat-Bash/lab/*.txt
+
+# WhatWeb (third-party tool, do not vendor)
+WhatWeb/
+
+# OS/editor junk
+.DS_Store
+*.swp

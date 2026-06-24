@@ -1,0 +1,55 @@
+name: Integration Testing
+on:
+  workflow_dispatch:
+  schedule:
+  - cron:  '0 0 */3 * *'
+
+jobs:
+  install_with_run_sh:
+    runs-on: ubuntu-latest
+    name: Install, Run and Test
+    steps:
+      - name: Install Docker
+        run: |
+          printf '%s\n' "deb https://download.docker.com/linux/debian bullseye stable" | sudo tee /etc/apt/sources.list.d/docker-ce.list
+          curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/docker-ce-archive-keyring.gpg
+          sudo apt update -y 
+          sudo apt install docker-ce docker-ce-cli containerd.io -y
+          sudo systemctl enable docker --now
+          
+      - name: Check Docker
+        run: |
+          if ! sudo docker info > /dev/null 2>&1; then
+            echo "Docker is not running"
+            exit 1
+          fi
+      - uses: actions/checkout@v3
+      - name: Deploy Lab
+        id: deploy
+        run: |
+          sudo DEBUG=true make deploy
+        working-directory: ./lab
+      
+      - name: Test Lab
+        id: test
+        run: | 
+          sleep 45 && sudo make test
+        working-directory: ./lab
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Run Python Unit Tests
+        id: test-with-python
+        run: |
+          pip3 install pytest requests
+          python3 -m pytest ./lab/tests/*
+
+      - name: Slack Notification Failure
+        id: notify_failure
+        
+        if: failure()
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"[FAILURE] Integration test (https://github.com/dolevf/Black-Hat-Bash/actions/runs/${{github.run_id}}) <!here>" }' ${{secrets.SLACK_WEBHOOK}}
